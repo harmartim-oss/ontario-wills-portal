@@ -90,3 +90,84 @@ export async function getUserByOpenId(openId: string) {
 }
 
 // TODO: add feature queries here as your schema grows.
+
+import { documents, beneficiaries, assets, InsertDocument, InsertBeneficiary, InsertAsset } from "../drizzle/schema";
+
+export async function getUserDocuments(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(documents).where(eq(documents.userId, userId));
+}
+
+export async function getDocumentById(documentId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(documents).where(eq(documents.id, documentId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createDocument(data: InsertDocument) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(documents).values(data);
+  return result;
+}
+
+export async function updateDocument(documentId: number, data: Partial<InsertDocument>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.update(documents).set(data).where(eq(documents.id, documentId));
+}
+
+export async function deleteDocument(documentId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.delete(documents).where(eq(documents.id, documentId));
+}
+
+export async function getBeneficiaries(documentId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(beneficiaries).where(eq(beneficiaries.documentId, documentId));
+}
+
+export async function createBeneficiary(data: InsertBeneficiary) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.insert(beneficiaries).values(data);
+}
+
+export async function deleteBeneficiary(beneficiaryId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.delete(beneficiaries).where(eq(beneficiaries.id, beneficiaryId));
+}
+
+export async function getAssets(documentId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(assets).where(eq(assets.documentId, documentId));
+}
+
+export async function createAsset(data: InsertAsset) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.insert(assets).values(data);
+}
+
+export async function deleteAsset(assetId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.delete(assets).where(eq(assets.id, assetId));
+}

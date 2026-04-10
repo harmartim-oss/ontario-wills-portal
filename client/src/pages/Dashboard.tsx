@@ -1,15 +1,29 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Plus, FileText, AlertCircle, TrendingUp, Users, Download, Edit, Trash2 } from "lucide-react";
-import { Link } from "wouter";
-import { useState } from "react";
+import { Plus, FileText, AlertCircle, TrendingUp, Users, Download, Edit, Trash2, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 export default function Dashboard() {
   const { user, isAuthenticated } = useAuth();
-  const [documents, setDocuments] = useState([
-    { id: 1, name: "My Will", type: "Will", created: "2026-03-15", status: "Draft" },
-    { id: 2, name: "POA for Property", type: "POA", created: "2026-03-10", status: "Completed" },
-  ]);
+  const [selectedDoc, setSelectedDoc] = useState<number | null>(null);
+  
+  // Fetch documents from backend
+  const { data: documents = [], isLoading, refetch } = trpc.documents.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  // Delete document mutation
+  const deleteDocMutation = trpc.documents.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Document deleted successfully");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error("Failed to delete document");
+    },
+  });
 
   if (!isAuthenticated) {
     return (
@@ -21,6 +35,15 @@ export default function Dashboard() {
       </div>
     );
   }
+
+  const handleDeleteDocument = (id: number) => {
+    if (confirm("Are you sure you want to delete this document?")) {
+      deleteDocMutation.mutate({ id });
+    }
+  };
+
+  const totalEstateValue = documents.reduce((sum, doc) => sum + (doc.estateValue || 0), 0);
+  const totalBeneficiaries = documents.length; // Simplified for now
 
   return (
     <div className="min-h-screen bg-background">
@@ -48,7 +71,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Estate Value</p>
-                <p className="text-3xl font-bold text-foreground\">$750K</p>
+                <p className="text-3xl font-bold text-foreground">${(totalEstateValue / 1000).toFixed(0)}K</p>
               </div>
               <TrendingUp className="w-12 h-12 text-accent opacity-20" />
             </div>
@@ -56,8 +79,8 @@ export default function Dashboard() {
           <div className="p-6 rounded-lg border border-border bg-card">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground mb-1\">Beneficiaries</p>
-                <p className="text-3xl font-bold text-foreground\">5</p>
+                <p className="text-sm text-muted-foreground mb-1">Beneficiaries</p>
+                <p className="text-3xl font-bold text-foreground">{totalBeneficiaries}</p>
               </div>
               <Users className="w-12 h-12 text-accent opacity-20" />
             </div>
@@ -65,66 +88,83 @@ export default function Dashboard() {
         </div>
 
         {/* Re-balancing Alerts */}
-        <div className="mb-12 p-6 rounded-lg border-2 border-orange-300/50 bg-orange-50/30">
-          <div className="flex items-start gap-4">
-            <AlertCircle className="w-6 h-6 text-orange-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <h3 className="font-semibold text-foreground mb-2">Distribution Alert</h3>
-              <p className="text-muted-foreground mb-3">
-                Bitcoin holdings have increased 15%, affecting your intended distribution percentages. Review and re-balance if needed.
-              </p>
-              <Button size="sm" variant="outline">View Details</Button>
+        {documents.length > 0 && (
+          <div className="mb-12 p-6 rounded-lg border-2 border-orange-300/50 bg-orange-50/30">
+            <div className="flex items-start gap-4">
+              <AlertCircle className="w-6 h-6 text-orange-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-foreground mb-2">Distribution Alert</h3>
+                <p className="text-muted-foreground mb-3">
+                  Review your estate distribution to ensure it aligns with current market values.
+                </p>
+                <Button size="sm" variant="outline">View Details</Button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Documents Section */}
         <div className="mb-8 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-foreground\">Your Documents</h2>
-                  <a href="/create-document">
-                    <Button className="gap-2">
-                      <Plus className="w-4 h-4" />
-                      New Document
-                    </Button>
-                  </a>
+          <h2 className="text-2xl font-bold text-foreground">Your Documents</h2>
+          <a href="/create-document">
+            <Button className="gap-2">
+              <Plus className="w-4 h-4" />
+              New Document
+            </Button>
+          </a>
         </div>
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-accent" />
+          </div>
+        )}
 
         {/* Documents List */}
-        <div className="space-y-4">
-          {documents.map((doc) => (
-            <div key={doc.id} className="p-6 rounded-lg border border-border bg-card hover:shadow-lg transition-shadow">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4 flex-1">
-                  <FileText className="w-10 h-10 text-accent" />
-                  <div>
-                    <h3 className="font-semibold text-foreground mb-1">{doc.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {doc.type} • Created {doc.created} • {doc.status}
-                    </p>
+        {!isLoading && documents.length > 0 && (
+          <div className="space-y-4">
+            {documents.map((doc) => (
+              <div key={doc.id} className="p-6 rounded-lg border border-border bg-card hover:shadow-lg transition-shadow">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4 flex-1">
+                    <FileText className="w-10 h-10 text-accent" />
+                    <div>
+                      <h3 className="font-semibold text-foreground mb-1">{doc.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {doc.documentType === "will" ? "Will" : doc.documentType === "poa-property" ? "POA for Property" : "POA for Personal Care"} • Created {new Date(doc.createdAt).toLocaleDateString()} • {doc.status}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <a href={`/view-document/${doc.id}`}>
+                      <Button size="sm" variant="outline" className="gap-2">
+                        <Edit className="w-4 h-4" />
+                        Edit
+                      </Button>
+                    </a>
+                    <Button size="sm" variant="outline" className="gap-2">
+                      <Download className="w-4 h-4" />
+                      Download
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="gap-2 text-destructive hover:text-destructive"
+                      onClick={() => handleDeleteDocument(doc.id)}
+                      disabled={deleteDocMutation.isPending}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <a href={`/view-document/${doc.id}`}>
-                    <Button size="sm" variant="outline" className="gap-2">
-                      <Edit className="w-4 h-4" />
-                      Edit
-                    </Button>
-                  </a>
-                  <Button size="sm" variant="outline" className="gap-2">
-                    <Download className="w-4 h-4" />
-                    Download
-                  </Button>
-                  <Button size="sm" variant="ghost" className="gap-2 text-destructive hover:text-destructive">
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Empty State */}
-        {documents.length === 0 && (
+        {!isLoading && documents.length === 0 && (
           <div className="text-center py-12">
             <FileText className="w-16 h-16 text-muted-foreground opacity-50 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-foreground mb-2">No documents yet</h3>

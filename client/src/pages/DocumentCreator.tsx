@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft, FileText, Users, DollarSign, CheckCircle } from "lucide-react";
+import { ArrowRight, ArrowLeft, FileText, Users, DollarSign, CheckCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 type DocumentType = "will" | "poa-property" | "poa-personal" | null;
 type Step = 1 | 2 | 3 | 4;
@@ -18,6 +20,19 @@ export default function DocumentCreator() {
     spouse: "",
     primaryBeneficiary: "",
     alternateExecutor: "",
+  });
+
+  // Create document mutation
+  const createDocMutation = trpc.documents.create.useMutation({
+    onSuccess: (result) => {
+      toast.success("Document created successfully!");
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 1500);
+    },
+    onError: (error) => {
+      toast.error("Failed to create document");
+    },
   });
 
   if (!isAuthenticated) {
@@ -52,8 +67,31 @@ export default function DocumentCreator() {
     }
   };
 
-  const handleSubmit = () => {
-    alert("Document created successfully! Download your PDF from the dashboard.");
+  const handleSubmit = async () => {
+    if (!documentType) {
+      toast.error("Please select a document type");
+      return;
+    }
+
+    if (!formData.testatorName) {
+      toast.error("Please enter your name");
+      return;
+    }
+
+    const documentTitle = `${formData.testatorName}'s ${
+      documentType === "will" ? "Will" : documentType === "poa-property" ? "POA for Property" : "POA for Personal Care"
+    }`;
+
+    createDocMutation.mutate({
+      documentType,
+      title: documentTitle,
+      testatorName: formData.testatorName,
+      testatorAge: formData.testatorAge ? parseInt(formData.testatorAge) : undefined,
+      maritalStatus: formData.maritalStatus || undefined,
+      hasChildren: formData.children === "yes",
+      primaryBeneficiary: formData.primaryBeneficiary || undefined,
+      alternateExecutor: formData.alternateExecutor || undefined,
+    });
   };
 
   const getDocumentTitle = () => {
@@ -146,7 +184,7 @@ export default function DocumentCreator() {
             <h2 className="text-3xl font-bold text-foreground">Tell us about yourself</h2>
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Full Name *</label>
                 <input
                   type="text"
                   value={formData.testatorName}
@@ -246,14 +284,14 @@ export default function DocumentCreator() {
                 <CheckCircle className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-medium text-foreground">Personal Information</p>
-                  <p className="text-muted-foreground">{formData.testatorName}, Age {formData.testatorAge}</p>
+                  <p className="text-muted-foreground">{formData.testatorName}, Age {formData.testatorAge || "Not specified"}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-medium text-foreground">Primary Beneficiary</p>
-                  <p className="text-muted-foreground">{formData.primaryBeneficiary}</p>
+                  <p className="text-muted-foreground">{formData.primaryBeneficiary || "Not specified"}</p>
                 </div>
               </div>
             </div>
@@ -277,8 +315,21 @@ export default function DocumentCreator() {
             Previous
           </Button>
           {currentStep === 4 ? (
-            <Button onClick={handleSubmit} className="gap-2">
-              Create Document <CheckCircle className="w-4 h-4" />
+            <Button 
+              onClick={handleSubmit} 
+              className="gap-2"
+              disabled={createDocMutation.isPending}
+            >
+              {createDocMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  Create Document <CheckCircle className="w-4 h-4" />
+                </>
+              )}
             </Button>
           ) : (
             <Button onClick={handleNext} className="gap-2">
