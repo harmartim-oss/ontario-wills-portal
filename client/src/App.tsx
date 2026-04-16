@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import DocumentCreator from "./pages/DocumentCreator";
 import ViewDocument from "./pages/ViewDocument";
+import ComprehensiveWillCreator from "./pages/ComprehensiveWillCreator";
 
 function Router() {
   return (
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/profile" component={Profile} />
       <Route path="/create-document" component={DocumentCreator} />
+      <Route path="/will-creator" component={ComprehensiveWillCreator} />
       <Route path="/view-document/:id" component={ViewDocument} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />

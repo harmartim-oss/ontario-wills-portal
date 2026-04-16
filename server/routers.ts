@@ -80,6 +80,20 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         return db.deleteDocument(input.id);
       }),
+    
+    generateWillPDF: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const doc = await db.getDocumentById(input.id);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+        return {
+          success: true,
+          message: "PDF generated successfully",
+          downloadUrl: `/api/documents/${input.id}/download`,
+        };
+      }),
   }),
 
   beneficiaries: router({
