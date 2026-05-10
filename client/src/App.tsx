@@ -15,6 +15,7 @@ import ComprehensiveWillCreator from "./pages/ComprehensiveWillCreator";
 import EnhancedWillCreator from "./pages/EnhancedWillCreator";
 import EnhancedPOAPropertyCreator from "./pages/EnhancedPOAPropertyCreator";
 import EnhancedPOAPersonalCareCreator from "./pages/EnhancedPOAPersonalCareCreator";
+import RevampedWillCreator from "./pages/RevampedWillCreator";
 
 function Router() {
   return (
@@ -29,6 +30,7 @@ function Router() {
       <Route path={"/enhanced-will-creator"} component={EnhancedWillCreator} />
       <Route path={"/poa-property-creator"} component={EnhancedPOAPropertyCreator} />
       <Route path={"/poa-personal-care-creator"} component={EnhancedPOAPersonalCareCreator} />
+      <Route path={"/revamped-will-creator"} component={RevampedWillCreator} />
       <Route path={"/view-document/:id"} component={ViewDocument} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
