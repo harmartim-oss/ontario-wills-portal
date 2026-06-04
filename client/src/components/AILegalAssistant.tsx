@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Send, MessageCircle, X, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { trpc } from "@/lib/trpc";
 
 interface Message {
   id: string;
@@ -28,6 +29,24 @@ export default function AILegalAssistant({ documentId, onClose }: AILegalAssista
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const sendMessage = trpc.chat.sendMessage.useMutation();
+  const chatHistory = trpc.chat.getHistory.useQuery(
+    { documentId: documentId ? parseInt(documentId) : undefined },
+    { enabled: !!documentId }
+  );
+
+  useEffect(() => {
+    if (chatHistory.data && chatHistory.data.length > 0) {
+      const formattedMessages = chatHistory.data.map((msg) => ({
+        id: msg.id.toString(),
+        role: msg.role as "user" | "assistant",
+        content: msg.content,
+        timestamp: msg.createdAt,
+      }));
+      setMessages(formattedMessages);
+    }
+  }, [chatHistory.data]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -39,7 +58,6 @@ export default function AILegalAssistant({ documentId, onClose }: AILegalAssista
   const handleSendMessage = async () => {
     if (!input.trim()) return;
 
-    // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
@@ -51,17 +69,31 @@ export default function AILegalAssistant({ documentId, onClose }: AILegalAssista
     setInput("");
     setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const result = await sendMessage.mutateAsync({
+        content: input,
+        documentId: documentId ? parseInt(documentId) : undefined,
+      });
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: `I understand your question about "${input}". Based on Ontario estate planning law, I can provide guidance on this topic. For complex legal matters, I recommend consulting with a qualified lawyer. How can I help you further?`,
+        content: result.aiResponse,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "Sorry, I encountered an error processing your message. Please try again.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -80,7 +112,7 @@ export default function AILegalAssistant({ documentId, onClose }: AILegalAssista
         {onClose && (
           <button
             onClick={onClose}
-            className="p-1 hover:bg-background/20 rounded transition-colors"
+            className="text-background hover:opacity-80 transition-opacity"
           >
             <X className="w-5 h-5" />
           </button>
@@ -96,17 +128,19 @@ export default function AILegalAssistant({ documentId, onClose }: AILegalAssista
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+              className={`flex ${
+                message.role === "user" ? "justify-end" : "justify-start"
+              }`}
             >
               <div
                 className={`max-w-xs px-4 py-2 rounded-lg ${
                   message.role === "user"
-                    ? "bg-accent text-accent-foreground rounded-br-none"
-                    : "bg-muted text-muted-foreground rounded-bl-none"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
                 }`}
               >
                 <p className="text-sm">{message.content}</p>
-                <span className="text-xs opacity-70 mt-1 block">
+                <span className="text-xs opacity-70">
                   {message.timestamp.toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -116,20 +150,14 @@ export default function AILegalAssistant({ documentId, onClose }: AILegalAssista
             </motion.div>
           ))}
         </AnimatePresence>
-
         {isLoading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex justify-start"
-          >
-            <div className="bg-muted text-muted-foreground px-4 py-2 rounded-lg rounded-bl-none flex items-center gap-2">
+          <div className="flex justify-start">
+            <div className="bg-muted text-muted-foreground px-4 py-2 rounded-lg flex items-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span className="text-sm">Thinking...</span>
+              <span className="text-sm">Analyzing...</span>
             </div>
-          </motion.div>
+          </div>
         )}
-
         <div ref={messagesEndRef} />
       </div>
 
@@ -139,16 +167,21 @@ export default function AILegalAssistant({ documentId, onClose }: AILegalAssista
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+          onKeyPress={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSendMessage();
+            }
+          }}
           placeholder="Ask a question..."
-          className="flex-1 px-3 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+          className="flex-1 px-3 py-2 rounded-md border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           disabled={isLoading}
         />
         <Button
-          size="sm"
           onClick={handleSendMessage}
           disabled={isLoading || !input.trim()}
-          className="gap-2"
+          size="sm"
+          className="bg-primary hover:bg-primary/90"
         >
           <Send className="w-4 h-4" />
         </Button>
