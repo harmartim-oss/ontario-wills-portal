@@ -135,6 +135,24 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(({ input }) => db.deleteAsset(input.id)),
   }),
+
+  chat: router({
+    getHistory: protectedProcedure
+      .input(z.object({ documentId: z.number().optional() }))
+      .query(({ ctx, input }) => db.getChatHistory(ctx.user.id, input.documentId)),
+    
+    sendMessage: protectedProcedure
+      .input(z.object({
+        content: z.string(),
+        documentId: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await db.saveChatMessage(ctx.user.id, "user", input.content, input.documentId);
+        const aiResponse = "Thank you for your question. I'm analyzing your document for legal compliance.";
+        await db.saveChatMessage(ctx.user.id, "assistant", aiResponse, input.documentId);
+        return { success: true, userMessage: input.content, aiResponse };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, chatMessages } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -170,4 +170,37 @@ export async function deleteAsset(assetId: number) {
   if (!db) throw new Error("Database not available");
   
   return db.delete(assets).where(eq(assets.id, assetId));
+}
+
+
+export async function getChatHistory(userId: number, documentId?: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    const query = documentId 
+      ? db.select().from(chatMessages).where(
+          and(eq(chatMessages.userId, userId), eq(chatMessages.documentId, documentId))
+        ).orderBy(chatMessages.createdAt)
+      : db.select().from(chatMessages).where(eq(chatMessages.userId, userId)).orderBy(chatMessages.createdAt);
+
+    return await query;
+  } catch (error) {
+    console.error("[Database] Failed to get chat history:", error);
+    return [];
+  }
+}
+
+export async function saveChatMessage(userId: number, role: "user" | "assistant", content: string, documentId?: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db.insert(chatMessages).values({
+    userId,
+    documentId: documentId || null,
+    role,
+    content,
+  });
+
+  return result;
 }
