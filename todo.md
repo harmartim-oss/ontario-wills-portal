@@ -47,7 +47,7 @@
 - [x] Create document list page with sorting/filtering
 - [x] Build "Create New Document" flow
 - [x] Implement document viewer/editor page
-- [ ] Add document download functionality (PDF)
+- [x] Add document download functionality (PDF)
 - [ ] Create document sharing/permissions system
 - [ ] Build document versioning/history
 - [x] Implement document deletion with confirmation
@@ -118,7 +118,11 @@
 - [x] documents.get - Get specific document
 - [x] documents.update - Update document
 - [x] documents.delete - Delete document
-- [ ] documents.download - Generate PDF
+- [x] documents.download - Generate PDF
+- [x] willGeneration.generateWill - Generate will content
+- [x] willGeneration.generateWillPDF - Generate will PDF
+- [x] willGeneration.previewWill - Preview will document
+- [x] willGeneration.validateWillData - Validate will data
 - [ ] chat.sendMessage - Send chat message
 - [ ] chat.getHistory - Get chat history
 - [x] user.getProfile - Get user profile

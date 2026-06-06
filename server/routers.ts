@@ -4,6 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
 import * as db from "./db";
+import { willGenerationRouter } from "./will_generation_procedures";
 
 export const appRouter = router({
   system: systemRouter,
@@ -153,6 +154,8 @@ export const appRouter = router({
         return { success: true, userMessage: input.content, aiResponse };
       }),
   }),
+
+  willGeneration: willGenerationRouter,
 });
 
 export type AppRouter = typeof appRouter;

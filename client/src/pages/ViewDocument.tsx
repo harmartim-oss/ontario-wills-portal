@@ -31,6 +31,20 @@ export default function ViewDocument() {
     },
   });
 
+  // Generate PDF mutation
+  const generatePdfMutation = trpc.willGeneration.generateWillPDF.useMutation({
+    onSuccess: (data) => {
+      if (data.pdfUrl) {
+        // Open PDF in new tab or download
+        window.open(data.pdfUrl, '_blank');
+        toast.success("PDF generated successfully");
+      }
+    },
+    onError: () => {
+      toast.error("Failed to generate PDF");
+    },
+  });
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -211,9 +225,28 @@ export default function ViewDocument() {
                 <Edit2 className="w-4 h-4" />
                 Edit Document
               </Button>
-              <Button variant="outline" className="gap-2">
-                <Download className="w-4 h-4" />
-                Download PDF
+              <Button 
+                variant="outline" 
+                className="gap-2"
+                onClick={() => {
+                  if (document && documentId) {
+                    const willData = typeof document.content === 'string' 
+                      ? JSON.parse(document.content || '{}') 
+                      : (document.content || {});
+                    generatePdfMutation.mutate({
+                      documentId,
+                      willData
+                    });
+                  }
+                }}
+                disabled={generatePdfMutation.isPending}
+              >
+                {generatePdfMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                {generatePdfMutation.isPending ? 'Generating...' : 'Download PDF'}
               </Button>
             </>
           )}
