@@ -40,7 +40,7 @@
 - [x] Display saved documents list
 - [x] Show re-balancing alerts widget
 - [x] Add quick action buttons
-- [ ] Implement document filtering and search
+- [x] Implement document filtering and search
 - [x] Create empty state designs
 
 ## Phase 6: Document Management
@@ -57,7 +57,7 @@
 - [x] Implement message input and sending
 - [x] Create message display with formatting
 - [ ] Add streaming support for AI responses
-- [ ] Build chat history persistence
+- [x] Build chat history persistence
 - [x] Implement context awareness (document-specific questions)
 - [x] Add chat clearing and new conversation options
 - [x] Style chat messages with proper formatting

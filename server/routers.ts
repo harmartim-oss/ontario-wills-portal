@@ -26,6 +26,61 @@ export const appRouter = router({
       db.getUserDocuments(ctx.user.id)
     ),
     
+    search: protectedProcedure
+      .input(z.object({
+        query: z.string().optional(),
+        documentType: z.enum(["will", "poa-property", "poa-personal"]).optional(),
+        status: z.enum(["draft", "completed", "signed"]).optional(),
+        sortBy: z.enum(["title", "createdAt", "updatedAt"]).default("updatedAt"),
+        sortOrder: z.enum(["asc", "desc"]).default("desc"),
+      }))
+      .query(async ({ ctx, input }) => {
+        try {
+          const documents = await db.getUserDocuments(ctx.user.id);
+          
+          let filtered = documents;
+          
+          // Filter by search query
+          if (input.query) {
+            const lowerQuery = input.query.toLowerCase();
+            filtered = filtered.filter(doc => 
+              doc.title?.toLowerCase().includes(lowerQuery) ||
+              doc.testatorName?.toLowerCase().includes(lowerQuery) ||
+              doc.primaryBeneficiary?.toLowerCase().includes(lowerQuery)
+            );
+          }
+          
+          // Filter by document type
+          if (input.documentType) {
+            filtered = filtered.filter(doc => doc.documentType === input.documentType);
+          }
+          
+          // Filter by status
+          if (input.status) {
+            filtered = filtered.filter(doc => doc.status === input.status);
+          }
+          
+          // Sort
+          filtered.sort((a, b) => {
+            let aVal: any = a[input.sortBy as keyof typeof a];
+            let bVal: any = b[input.sortBy as keyof typeof b];
+            
+            if (aVal < bVal) return input.sortOrder === "asc" ? -1 : 1;
+            if (aVal > bVal) return input.sortOrder === "asc" ? 1 : -1;
+            return 0;
+          });
+          
+          return {
+            success: true,
+            documents: filtered,
+            total: filtered.length,
+          };
+        } catch (error) {
+          console.error("Error searching documents:", error);
+          throw new Error("Failed to search documents");
+        }
+      }),
+    
     getById: protectedProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {

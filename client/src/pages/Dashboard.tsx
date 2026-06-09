@@ -1,24 +1,39 @@
-import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Plus, FileText, AlertCircle, TrendingUp, Users, Download, Edit, Trash2, Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Plus, FileText, AlertCircle, TrendingUp, Users, Download, Edit, Trash2, Loader2, Search, X } from "lucide-react";
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 
 export default function Dashboard() {
   const { user, isAuthenticated } = useAuth();
   const [selectedDoc, setSelectedDoc] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState<"" | "will" | "poa-property" | "poa-personal">("");
+  const [filterStatus, setFilterStatus] = useState<"" | "draft" | "completed" | "signed">("");
+  const [sortBy, setSortBy] = useState<"title" | "createdAt" | "updatedAt">("updatedAt");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   
-  // Fetch documents from backend
-  const { data: documents = [], isLoading, refetch } = trpc.documents.list.useQuery(undefined, {
-    enabled: isAuthenticated,
-  });
+  // Fetch documents with search/filter
+  const { data: searchResult, isLoading } = trpc.documents.search.useQuery(
+    {
+      query: searchQuery || undefined,
+      documentType: filterType || undefined,
+      status: filterStatus || undefined,
+      sortBy,
+      sortOrder,
+    },
+    {
+      enabled: isAuthenticated,
+    }
+  );
+  
+  const documents = searchResult?.documents || [];
 
   // Delete document mutation
   const deleteDocMutation = trpc.documents.delete.useMutation({
     onSuccess: () => {
       toast.success("Document deleted successfully");
-      refetch();
     },
     onError: (error) => {
       toast.error("Failed to delete document");
@@ -43,7 +58,7 @@ export default function Dashboard() {
   };
 
   const totalEstateValue = documents.reduce((sum, doc) => sum + (doc.estateValue || 0), 0);
-  const totalBeneficiaries = documents.length; // Simplified for now
+  const totalBeneficiaries = documents.length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -114,6 +129,66 @@ export default function Dashboard() {
           </a>
         </div>
 
+        {/* Search and Filter Controls */}
+        <div className="mb-6 space-y-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Search Input */}
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search by title, testator name, or beneficiary..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+
+            {/* Filter by Type */}
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value as any)}
+              className="px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+            >
+              <option value="">All Types</option>
+              <option value="will">Will</option>
+              <option value="poa-property">POA for Property</option>
+              <option value="poa-personal">POA for Personal Care</option>
+            </select>
+
+            {/* Filter by Status */}
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value as any)}
+              className="px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+            >
+              <option value="">All Status</option>
+              <option value="draft">Draft</option>
+              <option value="completed">Completed</option>
+              <option value="signed">Signed</option>
+            </select>
+
+            {/* Sort By */}
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+            >
+              <option value="updatedAt">Recently Updated</option>
+              <option value="createdAt">Recently Created</option>
+              <option value="title">Title (A-Z)</option>
+            </select>
+          </div>
+        </div>
+
         {/* Loading State */}
         {isLoading && (
           <div className="flex items-center justify-center py-12">
@@ -167,8 +242,14 @@ export default function Dashboard() {
         {!isLoading && documents.length === 0 && (
           <div className="text-center py-12">
             <FileText className="w-16 h-16 text-muted-foreground opacity-50 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-foreground mb-2">No documents yet</h3>
-            <p className="text-muted-foreground mb-6">Create your first Will or Power of Attorney to get started</p>
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              {searchQuery || filterType || filterStatus ? "No matching documents" : "No documents yet"}
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              {searchQuery || filterType || filterStatus 
+                ? "Try adjusting your search or filter criteria"
+                : "Create your first Will or Power of Attorney to get started"}
+            </p>
             <a href="/create-document">
               <Button className="gap-2">
                 <Plus className="w-4 h-4" />
