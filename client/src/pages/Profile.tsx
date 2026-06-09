@@ -1,12 +1,74 @@
-import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { User, Mail, LogOut, Shield, Bell, Lock } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 export default function Profile() {
   const { user, logout, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState<"profile" | "security" | "notifications">("profile");
   const [isSaving, setIsSaving] = useState(false);
+  const [formData, setFormData] = useState({ name: "", email: "" });
+  const [settings, setSettings] = useState({ emailNotifications: true, documentReminders: true, marketingEmails: false });
+
+  // Fetch user profile
+  const { data: profileData } = trpc.user.getProfile.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  // Fetch user settings
+  const { data: settingsData } = trpc.user.getSettings.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  // Update profile mutation
+  const updateProfileMutation = trpc.user.updateProfile.useMutation({
+    onSuccess: () => {
+      toast.success("Profile updated successfully");
+    },
+    onError: () => {
+      toast.error("Failed to update profile");
+    },
+  });
+
+  // Update settings mutation
+  const updateSettingsMutation = trpc.user.updateSettings.useMutation({
+    onSuccess: () => {
+      toast.success("Settings updated successfully");
+    },
+    onError: () => {
+      toast.error("Failed to update settings");
+    },
+  });
+
+  // Delete account mutation
+  const deleteAccountMutation = trpc.user.deleteAccount.useMutation({
+    onSuccess: () => {
+      toast.success("Account deletion initiated");
+      logout();
+    },
+    onError: () => {
+      toast.error("Failed to delete account");
+    },
+  });
+
+  // Initialize form data
+  useEffect(() => {
+    if (profileData?.user) {
+      setFormData({
+        name: profileData.user.name || "",
+        email: profileData.user.email || "",
+      });
+    }
+  }, [profileData]);
+
+  // Initialize settings
+  useEffect(() => {
+    if (settingsData?.settings) {
+      setSettings(settingsData.settings);
+    }
+  }, [settingsData]);
 
   if (!isAuthenticated) {
     return (
@@ -23,13 +85,37 @@ export default function Profile() {
     await logout();
   };
 
-  const handleSave = async () => {
+  const handleSaveProfile = async () => {
     setIsSaving(true);
-    // Simulate save
-    setTimeout(() => {
+    try {
+      await updateProfileMutation.mutateAsync({
+        name: formData.name,
+        email: formData.email,
+      });
+    } finally {
       setIsSaving(false);
-      alert("Changes saved successfully!");
-    }, 1000);
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    setIsSaving(true);
+    try {
+      await updateSettingsMutation.mutateAsync({
+        emailNotifications: settings.emailNotifications,
+        documentReminders: settings.documentReminders,
+        marketingEmails: settings.marketingEmails,
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+      await deleteAccountMutation.mutateAsync({
+        reason: "User requested deletion",
+      });
+    }
   };
 
   return (
@@ -101,7 +187,8 @@ export default function Profile() {
                       <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
                       <input
                         type="text"
-                        defaultValue={user?.name || ""}
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
                       />
                     </div>
@@ -109,7 +196,8 @@ export default function Profile() {
                       <label className="block text-sm font-medium text-foreground mb-2">Email</label>
                       <input
                         type="email"
-                        defaultValue={user?.email || ""}
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
                       />
                     </div>
@@ -126,8 +214,8 @@ export default function Profile() {
                       </div>
                     </div>
                     <div className="flex gap-3 pt-4">
-                      <Button onClick={handleSave} disabled={isSaving}>
-                        {isSaving ? "Saving..." : "Save Changes"}
+                      <Button onClick={handleSaveProfile} disabled={isSaving || updateProfileMutation.isPending}>
+                        {isSaving || updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
                       </Button>
                       <Button variant="outline">Cancel</Button>
                     </div>
@@ -183,7 +271,9 @@ export default function Profile() {
                       <p className="text-muted-foreground mb-4">
                         Permanently delete your account and all associated data. This action cannot be undone.
                       </p>
-                      <Button variant="destructive">Delete Account</Button>
+                      <Button variant="destructive" onClick={handleDeleteAccount} disabled={deleteAccountMutation.isPending}>
+                        {deleteAccountMutation.isPending ? "Deleting..." : "Delete Account"}
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -197,36 +287,56 @@ export default function Profile() {
                   <h2 className="text-2xl font-bold text-foreground mb-6">Notification Preferences</h2>
                   <div className="space-y-4">
                     <label className="flex items-center gap-3 p-4 rounded-lg hover:bg-muted cursor-pointer transition-colors">
-                      <input type="checkbox" defaultChecked className="w-5 h-5 rounded" />
+                      <input
+                        type="checkbox"
+                        checked={settings.documentReminders}
+                        onChange={(e) => setSettings({ ...settings, documentReminders: e.target.checked })}
+                        className="w-5 h-5 rounded"
+                      />
                       <div>
                         <p className="font-medium text-foreground">Document Updates</p>
                         <p className="text-sm text-muted-foreground">Notify me when documents are updated</p>
                       </div>
                     </label>
                     <label className="flex items-center gap-3 p-4 rounded-lg hover:bg-muted cursor-pointer transition-colors">
-                      <input type="checkbox" defaultChecked className="w-5 h-5 rounded" />
+                      <input
+                        type="checkbox"
+                        checked={settings.emailNotifications}
+                        onChange={(e) => setSettings({ ...settings, emailNotifications: e.target.checked })}
+                        className="w-5 h-5 rounded"
+                      />
                       <div>
                         <p className="font-medium text-foreground">Re-balancing Alerts</p>
                         <p className="text-sm text-muted-foreground">Alert me when asset values change significantly</p>
                       </div>
                     </label>
                     <label className="flex items-center gap-3 p-4 rounded-lg hover:bg-muted cursor-pointer transition-colors">
-                      <input type="checkbox" className="w-5 h-5 rounded" />
+                      <input
+                        type="checkbox"
+                        checked={settings.emailNotifications}
+                        onChange={(e) => setSettings({ ...settings, emailNotifications: e.target.checked })}
+                        className="w-5 h-5 rounded"
+                      />
                       <div>
                         <p className="font-medium text-foreground">Product Updates</p>
                         <p className="text-sm text-muted-foreground">Notify me about new features and improvements</p>
                       </div>
                     </label>
                     <label className="flex items-center gap-3 p-4 rounded-lg hover:bg-muted cursor-pointer transition-colors">
-                      <input type="checkbox" className="w-5 h-5 rounded" />
+                      <input
+                        type="checkbox"
+                        checked={settings.marketingEmails}
+                        onChange={(e) => setSettings({ ...settings, marketingEmails: e.target.checked })}
+                        className="w-5 h-5 rounded"
+                      />
                       <div>
                         <p className="font-medium text-foreground">Marketing Emails</p>
                         <p className="text-sm text-muted-foreground">Receive promotional offers and tips</p>
                       </div>
                     </label>
                     <div className="flex gap-3 pt-4">
-                      <Button onClick={handleSave} disabled={isSaving}>
-                        {isSaving ? "Saving..." : "Save Preferences"}
+                      <Button onClick={handleSaveSettings} disabled={isSaving || updateSettingsMutation.isPending}>
+                        {isSaving || updateSettingsMutation.isPending ? "Saving..." : "Save Preferences"}
                       </Button>
                       <Button variant="outline">Cancel</Button>
                     </div>

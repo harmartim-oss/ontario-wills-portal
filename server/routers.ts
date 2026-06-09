@@ -6,6 +6,7 @@ import { z } from "zod";
 import * as db from "./db";
 import { willGenerationRouter } from "./will_generation_procedures";
 import { chatRouter } from "./chat_procedures";
+import { userRouter } from "./user_procedures";
 
 export const appRouter = router({
   system: systemRouter,
@@ -195,6 +196,7 @@ export const appRouter = router({
 
   willGeneration: willGenerationRouter,
   chat: chatRouter,
+  user: userRouter,
 });
 
 export type AppRouter = typeof appRouter;

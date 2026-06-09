@@ -75,10 +75,10 @@
 ## Phase 9: User Profile & Settings
 - [x] Build profile page with user information
 - [x] Create account settings page
-- [ ] Implement profile picture upload
-- [ ] Add notification preferences
+- [x] Implement profile picture upload
+- [x] Add notification preferences
 - [ ] Create privacy settings
-- [ ] Build account deletion option
+- [x] Build account deletion option
 - [ ] Add two-factor authentication (if applicable)
 - [ ] Implement password change functionality
 
@@ -130,8 +130,14 @@
 - [x] user.getProfile - Get user profile
 - [x] user.updateProfile - Update profile
 - [x] user.updateSettings - Update settings
-- [ ] subscription.getCurrentPlan - Get current plan
-- [ ] subscription.upgradePlan - Upgrade to premium
+- [x] subscription.getCurrentPlan - Get current plan
+- [x] subscription.upgradePlan - Upgrade to premium
+- [x] user.getProfile - Get user profile
+- [x] user.updateProfile - Update profile
+- [x] user.uploadProfilePicture - Upload profile picture
+- [x] user.getSettings - Get user settings
+- [x] user.updateSettings - Update settings
+- [x] user.deleteAccount - Delete account
 
 ## Completed Features
 - [x] Design system with navy/slate branding
