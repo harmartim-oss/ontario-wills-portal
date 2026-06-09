@@ -54,12 +54,12 @@
 
 ## Phase 7: AI Legal Assistant Chat
 - [x] Design chat interface layout
-- [ ] Implement message input and sending
-- [ ] Create message display with formatting
+- [x] Implement message input and sending
+- [x] Create message display with formatting
 - [ ] Add streaming support for AI responses
 - [ ] Build chat history persistence
-- [ ] Implement context awareness (document-specific questions)
-- [ ] Add chat clearing and new conversation options
+- [x] Implement context awareness (document-specific questions)
+- [x] Add chat clearing and new conversation options
 - [x] Style chat messages with proper formatting
 
 ## Phase 8: About / How It Works Page
@@ -123,8 +123,10 @@
 - [x] willGeneration.generateWillPDF - Generate will PDF
 - [x] willGeneration.previewWill - Preview will document
 - [x] willGeneration.validateWillData - Validate will data
-- [ ] chat.sendMessage - Send chat message
-- [ ] chat.getHistory - Get chat history
+- [x] chat.sendMessage - Send chat message
+- [x] chat.getHistory - Get chat history
+- [x] chat.clearHistory - Clear chat history
+- [x] chat.saveMessage - Save message to history
 - [x] user.getProfile - Get user profile
 - [x] user.updateProfile - Update profile
 - [x] user.updateSettings - Update settings

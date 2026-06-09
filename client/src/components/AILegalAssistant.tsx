@@ -31,17 +31,17 @@ export default function AILegalAssistant({ documentId, onClose }: AILegalAssista
 
   const sendMessage = trpc.chat.sendMessage.useMutation();
   const chatHistory = trpc.chat.getHistory.useQuery(
-    { documentId: documentId ? parseInt(documentId) : undefined },
-    { enabled: !!documentId }
+    { limit: 50, offset: 0 },
+    { enabled: true }
   );
 
   useEffect(() => {
-    if (chatHistory.data && chatHistory.data.length > 0) {
-      const formattedMessages = chatHistory.data.map((msg) => ({
-        id: msg.id.toString(),
+    if (chatHistory.data && chatHistory.data.messages && chatHistory.data.messages.length > 0) {
+      const formattedMessages = chatHistory.data.messages.map((msg: any, idx: number) => ({
+        id: idx.toString(),
         role: msg.role as "user" | "assistant",
         content: msg.content,
-        timestamp: msg.createdAt,
+        timestamp: new Date(),
       }));
       setMessages(formattedMessages);
     }
@@ -71,14 +71,23 @@ export default function AILegalAssistant({ documentId, onClose }: AILegalAssista
 
     try {
       const result = await sendMessage.mutateAsync({
-        content: input,
-        documentId: documentId ? parseInt(documentId) : undefined,
+        messages: [
+          ...messages.map(m => ({
+            role: m.role as "user" | "assistant",
+            content: m.content,
+          })),
+          { role: "user" as const, content: input },
+        ],
+        documentContext: documentId ? {
+          documentId: parseInt(documentId),
+          documentType: "will",
+        } : undefined,
       });
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: result.aiResponse,
+        content: typeof result.message === 'string' ? result.message : 'Response received',
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
