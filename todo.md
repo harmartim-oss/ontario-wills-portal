@@ -30,8 +30,8 @@
 - [x] Create Free tier details and features
 - [x] Create Premium tier details and features
 - [x] Build side-by-side feature comparison table
-- [ ] Add upgrade/downgrade buttons
-- [ ] Implement plan selection logic
+- [x] Add upgrade/downgrade buttons
+- [x] Implement plan selection logic
 - [x] Add FAQ for pricing questions
 
 ## Phase 5: Authenticated User Dashboard

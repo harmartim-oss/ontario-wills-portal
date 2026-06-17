@@ -1,14 +1,25 @@
-import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
-import { CheckCircle, X, ArrowRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CheckCircle, X, ArrowRight, Loader2 } from "lucide-react";
 import { getLoginUrl } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
 import { updatePageSEO, SEO_CONFIGS } from "@/lib/seo";
+import { trpc } from "@/lib/trpc";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function Pricing() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const loginUrl = getLoginUrl();
+  const [currentPlan, setCurrentPlan] = useState<'free' | 'premium'>('free');
+  const upgradePlan = trpc.user.upgradePlan.useMutation();
+  const getCurrentPlan = trpc.user.getCurrentPlan.useQuery(undefined, { enabled: isAuthenticated });
+  
+  useEffect(() => {
+    if (getCurrentPlan.data && getCurrentPlan.data.plan) {
+      setCurrentPlan(getCurrentPlan.data.plan.type === 'premium' ? 'premium' : 'free');
+    }
+  }, [getCurrentPlan.data]);
   
   useEffect(() => {
     updatePageSEO(SEO_CONFIGS.pricing);
@@ -53,9 +64,11 @@ export default function Pricing() {
                 <p className="text-4xl font-bold text-foreground">$0</p>
                 <p className="text-muted-foreground text-sm mt-2">Forever free</p>
               </div>
-              <Button size="lg" variant="outline" className="w-full mb-8">
-                {isAuthenticated ? "Go to Dashboard" : "Get Started"}
-              </Button>
+              <Link href={isAuthenticated ? "/dashboard" : loginUrl}>
+                <Button size="lg" variant="outline" className="w-full mb-8">
+                  {isAuthenticated ? "Go to Dashboard" : "Get Started"}
+                </Button>
+              </Link>
               <div className="space-y-4 flex-1">
                 <p className="font-semibold text-foreground mb-4">Includes:</p>
                 <ul className="space-y-3">
@@ -96,8 +109,33 @@ export default function Pricing() {
                 <p className="text-4xl font-bold text-foreground">$99</p>
                 <p className="text-muted-foreground text-sm mt-2">One-time purchase</p>
               </div>
-              <Button size="lg" className="w-full mb-8 gap-2">
-                Upgrade Now <ArrowRight className="w-4 h-4" />
+              <Button 
+                size="lg" 
+                className="w-full mb-8 gap-2"
+                disabled={!isAuthenticated || upgradePlan.isPending || currentPlan === 'premium'}
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    window.location.href = loginUrl;
+                    return;
+                  }
+                  upgradePlan.mutate({ planType: 'premium', billingCycle: 'annual' }, {
+                    onSuccess: () => {
+                      toast.success('Successfully upgraded to Premium!');
+                      setCurrentPlan('premium');
+                    },
+                    onError: () => {
+                      toast.error('Failed to upgrade plan');
+                    }
+                  });
+                }}
+              >
+                {upgradePlan.isPending ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Upgrading...</>
+                ) : currentPlan === 'premium' ? (
+                  <>Current Plan</>
+                ) : (
+                  <>Upgrade Now <ArrowRight className="w-4 h-4" /></>
+                )}
               </Button>
               <div className="space-y-4 flex-1">
                 <p className="font-semibold text-foreground mb-4">Everything in Free, plus:</p>
