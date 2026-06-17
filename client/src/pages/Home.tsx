@@ -1,11 +1,17 @@
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle, Shield, Zap, TrendingUp, Users, Lock, FileText } from "lucide-react";
 import { getLoginUrl } from "@/const";
 import { Link } from "wouter";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { updatePageSEO, SEO_CONFIGS } from "@/lib/seo";
 
 export default function Home() {
   const { user, isAuthenticated } = useAuth();
+  
+  useEffect(() => {
+    updatePageSEO(SEO_CONFIGS.home);
+  }, []);
   const loginUrl = getLoginUrl();
 
   return (

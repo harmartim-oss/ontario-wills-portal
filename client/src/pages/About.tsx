@@ -1,10 +1,16 @@
 import { Shield, CheckCircle, Lock, FileText, Users, Zap } from "lucide-react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { getLoginUrl } from "@/const";
+import { updatePageSEO, SEO_CONFIGS } from "@/lib/seo";
 
 export default function About() {
   const loginUrl = getLoginUrl();
+  
+  useEffect(() => {
+    updatePageSEO(SEO_CONFIGS.about);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
