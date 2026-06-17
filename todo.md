@@ -170,13 +170,13 @@
 
 
 ## Enhanced Signup & Account Management (New)
-- [ ] Create enhanced signup page with account info collection
-- [ ] Add pricing tier selection during signup
-- [ ] Implement tier display in navbar/header
-- [ ] Create account settings page with tier info
-- [ ] Add tier upgrade/downgrade confirmation flow
-- [ ] Display current tier badge in profile
-- [ ] Add tier benefits display in account settings
+- [x] Create enhanced signup page with account info collection
+- [x] Add pricing tier selection during signup
+- [x] Implement tier display in navbar/header
+- [x] Create account settings page with tier info
+- [x] Add tier upgrade/downgrade confirmation flow
+- [x] Display current tier badge in profile
+- [x] Add tier benefits display in account settings
 - [ ] Implement tier-based feature access control
 - [ ] Create tier comparison modal
-- [ ] Add account info update functionality
+- [x] Add account info update functionality

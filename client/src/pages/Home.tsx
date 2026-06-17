@@ -2,16 +2,25 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle, Shield, Zap, TrendingUp, Users, Lock, FileText } from "lucide-react";
 import { getLoginUrl } from "@/const";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { updatePageSEO, SEO_CONFIGS } from "@/lib/seo";
 
 export default function Home() {
   const { user, isAuthenticated } = useAuth();
+  const [, navigate] = useLocation();
   
   useEffect(() => {
     updatePageSEO(SEO_CONFIGS.home);
   }, []);
+
+  // Redirect new users to onboarding if they just signed up
+  useEffect(() => {
+    if (isAuthenticated && user && !user.name) {
+      navigate("/onboarding");
+    }
+  }, [isAuthenticated, user, navigate]);
+
   const loginUrl = getLoginUrl();
 
   return (

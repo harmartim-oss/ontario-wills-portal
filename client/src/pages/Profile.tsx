@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { User, Mail, LogOut, Shield, Bell, Lock, Crown, ArrowRight } from "lucide-react";
+import { User, Mail, LogOut, Shield, Bell, Lock, Crown, ArrowRight, CheckCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
@@ -187,6 +187,19 @@ export default function Profile() {
                   Notifications
                 </div>
               </button>
+              <button
+                onClick={() => setActiveTab("billing")}
+                className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
+                  activeTab === "billing"
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Crown className="w-5 h-5" />
+                  Billing & Plan
+                </div>
+              </button>
             </div>
           </div>
 
@@ -355,6 +368,75 @@ export default function Profile() {
                       </Button>
                       <Button variant="outline">Cancel</Button>
                     </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Billing Tab */}
+            {activeTab === "billing" && (
+              <div className="space-y-8">
+                <div className="p-8 rounded-lg border border-border bg-card">
+                  <h2 className="text-2xl font-bold text-foreground mb-6">Current Plan</h2>
+                  <div className="space-y-6">
+                    {/* Current Plan Display */}
+                    <div className="p-6 rounded-lg bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/20">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">Current Plan</p>
+                          <h3 className="text-3xl font-bold text-foreground">
+                            {planData?.plan?.type === "premium" ? "Premium" : "Free"}
+                          </h3>
+                        </div>
+                        <Crown className="w-12 h-12 text-accent" />
+                      </div>
+                      <p className="text-muted-foreground">{planData?.plan?.name || "Free Plan"}</p>
+                    </div>
+
+                    {/* Plan Features */}
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-4">Included Features:</h4>
+                      <ul className="space-y-2">
+                        {planData?.plan?.features?.map((feature, idx) => (
+                          <li key={idx} className="flex items-center gap-2 text-muted-foreground">
+                            <CheckCircle className="w-5 h-5 text-accent flex-shrink-0" />
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Upgrade Button */}
+                    {planData?.plan?.type !== "premium" && (
+                      <div className="pt-4">
+                        <Button
+                          size="lg"
+                          onClick={() => {
+                            upgradePlanMutation.mutate(
+                              { planType: "premium", billingCycle: "annual" },
+                              {
+                                onSuccess: () => {
+                                  toast.success("Successfully upgraded to Premium!");
+                                },
+                                onError: () => {
+                                  toast.error("Failed to upgrade plan");
+                                },
+                              }
+                            );
+                          }}
+                          disabled={upgradePlanMutation.isPending}
+                          className="gap-2"
+                        >
+                          {upgradePlanMutation.isPending ? (
+                            <>Upgrading...</>
+                          ) : (
+                            <>
+                              Upgrade to Premium <ArrowRight className="w-4 h-4" />
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
