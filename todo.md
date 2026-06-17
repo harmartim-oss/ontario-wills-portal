@@ -167,3 +167,16 @@
 - [x] Professional UI with tier selection and progress tracking
 - [x] All routes registered in App.tsx
 - [x] 56 unit tests passing (100% success rate)
+
+
+## Enhanced Signup & Account Management (New)
+- [ ] Create enhanced signup page with account info collection
+- [ ] Add pricing tier selection during signup
+- [ ] Implement tier display in navbar/header
+- [ ] Create account settings page with tier info
+- [ ] Add tier upgrade/downgrade confirmation flow
+- [ ] Display current tier badge in profile
+- [ ] Add tier benefits display in account settings
+- [ ] Implement tier-based feature access control
+- [ ] Create tier comparison modal
+- [ ] Add account info update functionality

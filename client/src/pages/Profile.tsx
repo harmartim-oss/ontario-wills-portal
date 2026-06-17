@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { User, Mail, LogOut, Shield, Bell, Lock } from "lucide-react";
+import { User, Mail, LogOut, Shield, Bell, Lock, Crown, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 export default function Profile() {
   const { user, logout, isAuthenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState<"profile" | "security" | "notifications">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "security" | "notifications" | "billing">("profile");
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "" });
   const [settings, setSettings] = useState({ emailNotifications: true, documentReminders: true, marketingEmails: false });
@@ -20,6 +20,21 @@ export default function Profile() {
   // Fetch user settings
   const { data: settingsData } = trpc.user.getSettings.useQuery(undefined, {
     enabled: isAuthenticated,
+  });
+
+  // Fetch current plan
+  const { data: planData } = trpc.user.getCurrentPlan.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  // Upgrade plan mutation
+  const upgradePlanMutation = trpc.user.upgradePlan.useMutation({
+    onSuccess: () => {
+      toast.success("Successfully upgraded to Premium!");
+    },
+    onError: () => {
+      toast.error("Failed to upgrade plan");
+    },
   });
 
   // Update profile mutation

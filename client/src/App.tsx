@@ -19,6 +19,7 @@ import RevampedWillCreator from "./pages/RevampedWillCreator";
 import WillCreatorPro from "./pages/WillCreatorPro";
 import POAPropertyCreator from "./pages/POAPropertyCreator";
 import POAPersonalCareCreator from "./pages/POAPersonalCareCreator";
+import Onboarding from "./pages/Onboarding";
 
 function Router() {
   return (
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/about" component={About} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/profile" component={Profile} />
+      <Route path="/onboarding" component={Onboarding} />
       <Route path="/create-document" component={DocumentCreator} />
        <Route path={"/document-creator"} component={DocumentCreator} />
       <Route path={"/enhanced-will-creator"} component={EnhancedWillCreator} />
