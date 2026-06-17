@@ -1,12 +1,18 @@
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
 import { CheckCircle, X, ArrowRight } from "lucide-react";
 import { getLoginUrl } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
+import { updatePageSEO, SEO_CONFIGS } from "@/lib/seo";
 
 export default function Pricing() {
   const { isAuthenticated } = useAuth();
   const loginUrl = getLoginUrl();
+  
+  useEffect(() => {
+    updatePageSEO(SEO_CONFIGS.pricing);
+  }, []);
 
   const features = [
     { name: "Wills & POAs", free: true, premium: true },

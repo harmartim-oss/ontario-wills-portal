@@ -1,0 +1,22 @@
+# Robots.txt for Ontario Wills
+# Allow search engines to crawl all pages except admin and private areas
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /private/
+Disallow: /api/
+Disallow: /.well-known/
+
+# Specific rules for common bots
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Crawl delay (in seconds)
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://ontariowill.com/sitemap.xml
