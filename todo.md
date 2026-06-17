@@ -154,3 +154,16 @@
 - [x] User profile and account settings
 - [x] Database schema with users, documents, beneficiaries, assets
 - [x] Core tRPC procedures for CRUD operations
+
+
+## Document Creation Improvements (Latest)
+- [x] Comprehensive question framework with 180+ questions
+- [x] Will Creator with 112 questions (Ontario Succession Law Reform Act compliant)
+- [x] POA Property Creator with 34 questions (Powers of Attorney Act compliant)
+- [x] POA Personal Care Creator with 34 questions (Health Care Consent Act compliant)
+- [x] Tiered questioning system (Basic for free users, Advanced for premium)
+- [x] Legal compliance notes and guidance for each question
+- [x] Best practices information gathering
+- [x] Professional UI with tier selection and progress tracking
+- [x] All routes registered in App.tsx
+- [x] 56 unit tests passing (100% success rate)

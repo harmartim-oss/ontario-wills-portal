@@ -9,13 +9,13 @@ import { useLocation } from 'wouter';
 import { toast } from 'sonner';
 import { getQuestionsForTier, getQuestionCountByTier, Question } from '@/lib/documentQuestions';
 
-interface WillData {
+interface POAData {
   [key: string]: any;
 }
 
-export default function WillCreatorPro() {
+export default function POAPersonalCareCreator() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [formData, setFormData] = useState<WillData>({});
+  const [formData, setFormData] = useState<POAData>({});
   const [questionTier, setQuestionTier] = useState<'basic' | 'advanced'>('basic');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [showTierSelector, setShowTierSelector] = useState(true);
@@ -27,14 +27,14 @@ export default function WillCreatorPro() {
   // Initialize questions based on tier selection
   useEffect(() => {
     if (!showTierSelector) {
-      const selectedQuestions = getQuestionsForTier('will', questionTier === 'advanced' ? 'all' : 'basic');
+      const selectedQuestions = getQuestionsForTier('poa-personal-care', questionTier === 'advanced' ? 'all' : 'basic') as Question[];
       setQuestions(selectedQuestions);
     }
   }, [showTierSelector, questionTier]);
 
   const currentQ = questions[currentQuestion];
   const progress = questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
-  const questionCounts = getQuestionCountByTier('will');
+  const questionCounts = getQuestionCountByTier('poa-personal-care');
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({
@@ -62,40 +62,38 @@ export default function WillCreatorPro() {
   };
 
   const handleSubmit = async () => {
-    if (!user || !formData.testatorFullName) {
+    if (!user || !formData.grantorFullName) {
       toast.error('Please fill in all required fields');
       return;
     }
 
     try {
       await createDocument.mutateAsync({
-        documentType: 'will',
-        title: `Will for ${formData.testatorFullName}`,
-        testatorName: formData.testatorFullName,
-        maritalStatus: formData.maritalStatus,
-        hasChildren: formData.hasChildren || false,
+        documentType: 'poa-property',
+        title: `Power of Attorney for Personal Care - ${formData.grantorFullName}`,
+        testatorName: formData.grantorFullName,
+        maritalStatus: formData.maritalStatus || 'Not specified',
+        hasChildren: false,
       });
 
-      toast.success('Will created successfully!');
+      toast.success('Power of Attorney for Personal Care created successfully!');
       navigate('/dashboard');
     } catch (error) {
-      toast.error('Error creating will');
+      toast.error('Error creating Power of Attorney');
       console.error(error);
     }
   };
 
-
-
   // Tier Selection Screen
   if (showTierSelector) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 p-6">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="mb-8 text-center">
             <div className="flex items-center justify-center gap-3 mb-4">
-              <FileText className="w-8 h-8 text-blue-600" />
-              <h1 className="text-3xl font-bold text-slate-900">Professional Will Creator</h1>
+              <FileText className="w-8 h-8 text-purple-600" />
+              <h1 className="text-3xl font-bold text-slate-900">Power of Attorney for Personal Care</h1>
             </div>
             <p className="text-slate-600 text-lg">Choose your experience level</p>
           </div>
@@ -103,7 +101,7 @@ export default function WillCreatorPro() {
           {/* Tier Selection Cards */}
           <div className="grid md:grid-cols-2 gap-6 mb-8">
             {/* Basic Tier */}
-            <Card className="p-8 border-2 border-slate-200 hover:border-blue-500 cursor-pointer transition-all"
+            <Card className="p-8 border-2 border-slate-200 hover:border-purple-500 cursor-pointer transition-all"
               onClick={() => handleTierSelection('basic')}>
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-slate-900 mb-2">Free Plan</h2>
@@ -111,29 +109,29 @@ export default function WillCreatorPro() {
               </div>
               <div className="space-y-3 mb-6">
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-slate-700">Essential testator information</span>
+                  <CheckCircle2 className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-slate-700">Grantor information</span>
                 </div>
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-slate-700">Family and beneficiary details</span>
+                  <CheckCircle2 className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-slate-700">Attorney (agent) selection</span>
                 </div>
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-slate-700">Basic asset information</span>
+                  <CheckCircle2 className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-slate-700">Healthcare decision authority</span>
                 </div>
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-slate-700">Executor and guardian selection</span>
+                  <CheckCircle2 className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-slate-700">Effective date selection</span>
                 </div>
               </div>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700">Start Free Plan</Button>
+              <Button className="w-full bg-purple-600 hover:bg-purple-700">Start Free Plan</Button>
             </Card>
 
             {/* Advanced Tier */}
-            <Card className="p-8 border-2 border-blue-500 bg-blue-50 hover:border-blue-600 cursor-pointer transition-all relative"
+            <Card className="p-8 border-2 border-purple-500 bg-purple-50 hover:border-purple-600 cursor-pointer transition-all relative"
               onClick={() => handleTierSelection('advanced')}>
-              <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+              <div className="absolute top-4 right-4 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
                 Premium
               </div>
               <div className="mb-6">
@@ -142,39 +140,39 @@ export default function WillCreatorPro() {
               </div>
               <div className="space-y-3 mb-6">
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
                   <span className="text-slate-700">All free plan questions</span>
                 </div>
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-slate-700">Advanced financial details</span>
+                  <CheckCircle2 className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-slate-700">Detailed healthcare preferences</span>
                 </div>
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-slate-700">Business and digital assets</span>
+                  <CheckCircle2 className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-slate-700">End-of-life care decisions</span>
                 </div>
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-slate-700">Complex family situations</span>
+                  <CheckCircle2 className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-slate-700">Medical history and preferences</span>
                 </div>
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-slate-700">Tax and legal considerations</span>
+                  <CheckCircle2 className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-slate-700">Religious and cultural considerations</span>
                 </div>
               </div>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700">Start Premium Plan</Button>
+              <Button className="w-full bg-purple-600 hover:bg-purple-700">Start Premium Plan</Button>
             </Card>
           </div>
 
           {/* Info Box */}
-          <Card className="p-6 bg-blue-50 border-blue-200">
+          <Card className="p-6 bg-purple-50 border-purple-200">
             <div className="flex gap-3">
-              <Info className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+              <Info className="w-6 h-6 text-purple-600 flex-shrink-0 mt-0.5" />
               <div>
                 <h3 className="font-semibold text-slate-900 mb-2">Which plan is right for you?</h3>
                 <p className="text-slate-700 text-sm">
-                  Choose the <strong>Free Plan</strong> if you have a simple estate with few assets and straightforward family situation. 
-                  Choose the <strong>Premium Plan</strong> if you have multiple properties, business interests, complex family situation, or significant assets.
+                  Choose the <strong>Free Plan</strong> for basic healthcare decision-making authority. 
+                  Choose the <strong>Premium Plan</strong> if you have complex medical conditions, specific end-of-life wishes, or religious/cultural healthcare preferences.
                 </p>
               </div>
             </div>
@@ -187,7 +185,7 @@ export default function WillCreatorPro() {
   // Question Screen
   if (!currentQ || questions.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 p-6 flex items-center justify-center">
         <Card className="p-8 text-center">
           <p className="text-slate-600">Loading questions...</p>
         </Card>
@@ -196,15 +194,15 @@ export default function WillCreatorPro() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 p-6">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <FileText className="w-8 h-8 text-blue-600" />
+              <FileText className="w-8 h-8 text-purple-600" />
               <div>
-                <h1 className="text-3xl font-bold text-slate-900">Professional Will Creator</h1>
+                <h1 className="text-3xl font-bold text-slate-900">Power of Attorney for Personal Care</h1>
                 <p className="text-slate-600 text-sm">{questionTier === 'advanced' ? 'Premium' : 'Free'} Plan</p>
               </div>
             </div>
@@ -225,7 +223,7 @@ export default function WillCreatorPro() {
         {/* Question Card */}
         <Card className="p-8 mb-8 shadow-lg border-0">
           <div className="mb-6">
-            <div className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-3">
+            <div className="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-3">
               {currentQ.section}
             </div>
             <h2 className="text-xl font-semibold text-slate-900">{currentQ.question}</h2>
@@ -248,7 +246,7 @@ export default function WillCreatorPro() {
                 type="text"
                 value={(formData as any)[currentQ.field] || ''}
                 onChange={(e) => handleInputChange(currentQ.field, e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="Enter your answer..."
               />
             )}
@@ -257,14 +255,14 @@ export default function WillCreatorPro() {
                 type="date"
                 value={(formData as any)[currentQ.field] || ''}
                 onChange={(e) => handleInputChange(currentQ.field, e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
             )}
             {currentQ.type === 'textarea' && (
               <textarea
                 value={(formData as any)[currentQ.field] || ''}
                 onChange={(e) => handleInputChange(currentQ.field, e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-24 resize-none"
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent min-h-24 resize-none"
                 placeholder="Enter your answer..."
               />
             )}
@@ -272,7 +270,7 @@ export default function WillCreatorPro() {
               <select
                 value={(formData as any)[currentQ.field] || ''}
                 onChange={(e) => handleInputChange(currentQ.field, e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               >
                 <option value="">Select an option...</option>
                 {currentQ.options?.map(option => (
@@ -286,7 +284,7 @@ export default function WillCreatorPro() {
                   type="checkbox"
                   checked={(formData as any)[currentQ.field] || false}
                   onChange={(e) => handleInputChange(currentQ.field, e.target.checked)}
-                  className="w-5 h-5 rounded border-slate-300 text-blue-600"
+                  className="w-5 h-5 rounded border-slate-300 text-purple-600"
                 />
                 <span className="text-slate-700">{currentQ.question}</span>
               </label>
@@ -296,7 +294,7 @@ export default function WillCreatorPro() {
                 type="number"
                 value={(formData as any)[currentQ.field] || ''}
                 onChange={(e) => handleInputChange(currentQ.field, e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="Enter a number..."
               />
             )}
@@ -318,10 +316,10 @@ export default function WillCreatorPro() {
               <Button
                 onClick={handleSubmit}
                 disabled={createDocument.isPending}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                {createDocument.isPending ? 'Creating...' : 'Create Will'}
+                {createDocument.isPending ? 'Creating...' : 'Create POA'}
               </Button>
             ) : (
               <Button
