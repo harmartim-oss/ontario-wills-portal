@@ -108,7 +108,7 @@
 - [ ] Document versions table
 - [ ] Chat history table
 - [x] User preferences table
-- [ ] Subscription/plan table
+- [x] Subscription/plan table
 
 ## Backend API Endpoints (tRPC Procedures)
 - [x] auth.me - Get current user
