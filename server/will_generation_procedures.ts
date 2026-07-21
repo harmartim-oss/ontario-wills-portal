@@ -1,6 +1,7 @@
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import { storagePut } from "./storage";
+import { canPerformAction } from "./tierEnforcement";
 
 /**
  * Helper function to generate a simple PDF buffer
@@ -106,10 +107,15 @@ export const willGenerationRouter = router({
       z.object({
         documentId: z.number(),
         willData: z.record(z.string(), z.any()),
+        useAdvancedQuestions: z.boolean().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
       try {
+        // Enforce premium tier for advanced questions
+        if (input.useAdvancedQuestions && !canPerformAction(ctx.user.id, "advanced_questions", ctx.user.role)) {
+          throw new Error("Advanced questions require a Premium subscription. Please upgrade your plan.");
+        }
         // In production, call Python backend to generate will
         // For now, return a placeholder response
         
@@ -173,10 +179,15 @@ Generated on: ${new Date().toLocaleDateString()}
     .input(
       z.object({
         willData: z.record(z.string(), z.any()),
+        useAdvancedQuestions: z.boolean().optional(),
       })
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       try {
+        // Enforce premium tier for advanced questions
+        if (input.useAdvancedQuestions && !canPerformAction(ctx.user.id, "advanced_questions", ctx.user.role)) {
+          throw new Error("Advanced questions require a Premium subscription. Please upgrade your plan.");
+        }
         // Generate a preview of the will
         const preview = `
 PREVIEW: LAST WILL AND TESTAMENT
