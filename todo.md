@@ -177,6 +177,6 @@
 - [x] Add tier upgrade/downgrade confirmation flow
 - [x] Display current tier badge in profile
 - [x] Add tier benefits display in account settings
-- [ ] Implement tier-based feature access control
+- [x] Implement tier-based feature access control
 - [ ] Create tier comparison modal
 - [x] Add account info update functionality

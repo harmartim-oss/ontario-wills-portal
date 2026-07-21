@@ -113,8 +113,11 @@ export const willGenerationRouter = router({
     .mutation(async ({ input, ctx }) => {
       try {
         // Enforce premium tier for advanced questions
-        if (input.useAdvancedQuestions && !canPerformAction(ctx.user.id, "advanced_questions", ctx.user.role)) {
-          throw new Error("Advanced questions require a Premium subscription. Please upgrade your plan.");
+        if (input.useAdvancedQuestions) {
+          const canAccess = await canPerformAction(ctx.user.id, "advanced_questions", ctx.user.role);
+          if (!canAccess) {
+            throw new Error("Advanced questions require a Premium subscription. Please upgrade your plan.");
+          }
         }
         // In production, call Python backend to generate will
         // For now, return a placeholder response
@@ -185,8 +188,11 @@ Generated on: ${new Date().toLocaleDateString()}
     .query(async ({ input, ctx }) => {
       try {
         // Enforce premium tier for advanced questions
-        if (input.useAdvancedQuestions && !canPerformAction(ctx.user.id, "advanced_questions", ctx.user.role)) {
-          throw new Error("Advanced questions require a Premium subscription. Please upgrade your plan.");
+        if (input.useAdvancedQuestions) {
+          const canAccess = await canPerformAction(ctx.user.id, "advanced_questions", ctx.user.role);
+          if (!canAccess) {
+            throw new Error("Advanced questions require a Premium subscription. Please upgrade your plan.");
+          }
         }
         // Generate a preview of the will
         const preview = `

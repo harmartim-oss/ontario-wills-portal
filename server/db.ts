@@ -1,6 +1,6 @@
 import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, chatMessages } from "../drizzle/schema";
+import { InsertUser, users, chatMessages, subscriptions, InsertSubscription, Subscription } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -203,4 +203,88 @@ export async function saveChatMessage(userId: number, role: "user" | "assistant"
   });
 
   return result;
+}
+
+
+// Subscription management functions
+
+export async function getUserSubscription(userId: number): Promise<Subscription | null> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get subscription: database not available");
+    return null;
+  }
+
+  try {
+    const result = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, userId))
+      .limit(1);
+
+    return result[0] || null;
+  } catch (error) {
+    console.error("[Database] Error getting subscription:", error);
+    return null;
+  }
+}
+
+export async function createOrUpdateSubscription(
+  userId: number,
+  data: Partial<InsertSubscription>
+): Promise<Subscription | null> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create/update subscription: database not available");
+    return null;
+  }
+
+  try {
+    const existing = await getUserSubscription(userId);
+
+    if (existing) {
+      // Update existing subscription
+      await db
+        .update(subscriptions)
+        .set({
+          ...data,
+          updatedAt: new Date(),
+        })
+        .where(eq(subscriptions.userId, userId));
+
+      return await getUserSubscription(userId);
+    } else {
+      // Create new subscription
+      await db.insert(subscriptions).values({
+        userId,
+        planType: "free",
+        status: "active",
+        ...data,
+      });
+
+      return await getUserSubscription(userId);
+    }
+  } catch (error) {
+    console.error("[Database] Error creating/updating subscription:", error);
+    return null;
+  }
+}
+
+export async function upgradeToPremium(userId: number): Promise<Subscription | null> {
+  return createOrUpdateSubscription(userId, {
+    planType: "premium",
+    status: "active",
+  });
+}
+
+export async function downgradeToFree(userId: number): Promise<Subscription | null> {
+  return createOrUpdateSubscription(userId, {
+    planType: "free",
+    status: "active",
+  });
+}
+
+export async function getUserTier(userId: number): Promise<"free" | "premium"> {
+  const subscription = await getUserSubscription(userId);
+  return subscription?.planType === "premium" ? "premium" : "free";
 }
