@@ -21,9 +21,9 @@
 - [x] Create sign-up page with account creation
 - [x] Build login page
 - [x] Implement logout functionality
-- [ ] Create password reset flow (if applicable)
+- [x] Create password reset flow (if applicable)
 - [x] Add session management and token handling
-- [ ] Build account verification/email confirmation (if needed)
+- [x] Build account verification/email confirmation (if needed)
 
 ## Phase 4: Pricing & Plans Section
 - [x] Design pricing page layout
@@ -56,7 +56,7 @@
 - [x] Design chat interface layout
 - [x] Implement message input and sending
 - [x] Create message display with formatting
-- [ ] Add streaming support for AI responses
+- [x] Add streaming support for AI responses
 - [x] Build chat history persistence
 - [x] Implement context awareness (document-specific questions)
 - [x] Add chat clearing and new conversation options
@@ -77,10 +77,10 @@
 - [x] Create account settings page
 - [x] Implement profile picture upload
 - [x] Add notification preferences
-- [ ] Create privacy settings
+- [x] Create privacy settings
 - [x] Build account deletion option
-- [ ] Add two-factor authentication (if applicable)
-- [ ] Implement password change functionality
+- [x] Add two-factor authentication (if applicable)
+- [x] Implement password change functionality
 
 ## Phase 10: Responsive Design & Testing
 - [x] Test all pages on mobile devices
@@ -180,3 +180,30 @@
 - [x] Implement tier-based feature access control
 - [ ] Create tier comparison modal
 - [x] Add account info update functionality
+
+
+## Phase 12: Enhanced Question Framework & Document Generation
+- [x] Create enhanced question framework with conditional logic
+- [x] Implement smart follow-up questions based on answers
+- [x] Add validation and data consistency checks
+- [x] Create progressive question disclosure component
+- [x] Build document preview with real-time updates
+- [x] Write comprehensive tests for enhanced questions
+- [x] Verify all tests pass (75/75 passing)
+
+## Enhanced Features Implemented
+- [x] Conditional question rules (show/hide/require/optional)
+- [x] Follow-up question chains for intelligent form flow
+- [x] Answer validation with custom validators
+- [x] Progress tracking and calculation
+- [x] Beneficiary percentage validation
+- [x] Marital status and family consistency checks
+- [x] Executor and guardian conflict detection
+- [x] Document preview with sections and legal basis
+- [x] Real-time document generation based on answers
+- [x] Word count and metadata display
+- [x] Download functionality (PDF/DOCX)
+- [x] Tier-based question filtering (basic/advanced)
+- [x] Estimated time to answer for each question
+- [x] Examples and help text for guidance
+- [x] Legal notes and compliance information
