@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { Share2, Trash2, Edit2 } from "lucide-react";
 
@@ -17,7 +17,7 @@ interface DocumentSharingProps {
 }
 
 export function DocumentSharing({ documentId }: DocumentSharingProps) {
-  const { toast } = useToast();
+
   const [isOpen, setIsOpen] = useState(false);
   const [userId, setUserId] = useState("");
   const [permission, setPermission] = useState<"view" | "edit" | "comment">("view");
@@ -36,59 +36,38 @@ export function DocumentSharing({ documentId }: DocumentSharingProps) {
   // Share document mutation
   const shareDocument = trpc.sharing.shareDocument.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Document shared successfully",
-      });
+      toast.success("Document shared successfully");
       setUserId("");
       setPermission("view");
       setIsOpen(false);
       refetch();
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to share document",
-        variant: "destructive",
-      });
+      toast.error(error.message || "Failed to share document");
     },
   });
 
   // Update permission mutation
   const updatePermission = trpc.sharing.updateSharePermission.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Permission updated",
-      });
+      toast.success("Permission updated");
       setEditingShareId(null);
       refetch();
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update permission",
-        variant: "destructive",
-      });
+      toast.error(error.message || "Failed to update permission");
     },
   });
 
   // Revoke share mutation
   const revokeShare = trpc.sharing.revokeShare.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Share revoked",
-      });
+      toast.success("Share revoked");
       setRevokeShareId(null);
       refetch();
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to revoke share",
-        variant: "destructive",
-      });
+      toast.error(error.message || "Failed to revoke share");
     },
   });
 
@@ -96,11 +75,7 @@ export function DocumentSharing({ documentId }: DocumentSharingProps) {
 
   const handleShare = () => {
     if (!userId) {
-      toast({
-        title: "Error",
-        description: "Please enter a user ID",
-        variant: "destructive",
-      });
+      toast.error("Please enter a user ID");
       return;
     }
 

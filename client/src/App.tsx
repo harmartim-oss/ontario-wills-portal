@@ -20,6 +20,7 @@ import WillCreatorPro from "./pages/WillCreatorPro";
 import POAPropertyCreator from "./pages/POAPropertyCreator";
 import POAPersonalCareCreator from "./pages/POAPersonalCareCreator";
 import Onboarding from "./pages/Onboarding";
+import { DocumentDetails } from "./pages/DocumentDetails";
 
 function Router() {
   return (
@@ -41,6 +42,8 @@ function Router() {
       <Route path={"/:404"} component={NotFound} />
       <Route path={"/poa-property-creator-pro"} component={POAPropertyCreator} />
       <Route path={"/poa-personal-care-creator-pro"} component={POAPersonalCareCreator} />
+      <Route path={"/:404"} component={NotFound} />
+      <Route path={"/documents/:id"} component={DocumentDetails} />
       <Route component={NotFound} />
     </Switch>
   );

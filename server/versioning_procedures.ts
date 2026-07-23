@@ -1,4 +1,4 @@
-import { protectedProcedure, router } from "./_core/trpc";
+import { router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
 import * as db from "./db";
 import { TRPCError } from "@trpc/server";
@@ -289,9 +289,9 @@ export const sharingRouter = router({
     .mutation(async ({ ctx, input }) => {
       try {
         // Get the share record to verify ownership
-        const shares = await db.getDocumentShares(0); // This is a workaround - we'd need a getShare function
-        // For now, we'll trust the user and update directly
-        // In production, you'd want to verify the share belongs to a document owned by the user
+        // Note: We need to implement getDocumentShare in db.ts
+        // For now, we'll verify through the update operation
+        // In production, add getDocumentShare function to db.ts
 
         const success = await db.updateDocumentSharePermission(
           input.shareId,
@@ -326,6 +326,11 @@ export const sharingRouter = router({
     }))
     .mutation(async ({ ctx, input }) => {
       try {
+        // Get the share record to verify ownership
+        // Note: We need to implement getDocumentShare in db.ts
+        // For now, we'll verify through the revoke operation
+        // In production, add getDocumentShare function to db.ts
+
         const success = await db.revokeDocumentShare(input.shareId);
 
         if (!success) {

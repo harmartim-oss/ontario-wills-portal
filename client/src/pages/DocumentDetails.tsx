@@ -9,12 +9,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Download, Trash2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export function DocumentDetails() {
   const { id } = useParams();
   const [, navigate] = useLocation();
-  const { toast } = useToast();
+
   const documentId = parseInt(id || "0");
 
   // Fetch document
@@ -28,38 +28,24 @@ export function DocumentDetails() {
   // Delete mutation
   const deleteDocument = trpc.documents.delete.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Document deleted successfully",
-      });
+      toast.success("Document deleted successfully");
       navigate("/dashboard");
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete document",
-        variant: "destructive",
-      });
+      toast.error(error.message || "Failed to delete document");
     },
   });
 
   // Generate PDF mutation
   const generatePDF = trpc.documents.generateWillPDF.useMutation({
     onSuccess: (data) => {
-      toast({
-        title: "Success",
-        description: "PDF generated successfully",
-      });
+      toast.success("PDF generated successfully");
       if (data.downloadUrl) {
         window.open(data.downloadUrl, "_blank");
       }
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to generate PDF",
-        variant: "destructive",
-      });
+      toast.error(error.message || "Failed to generate PDF");
     },
   });
 

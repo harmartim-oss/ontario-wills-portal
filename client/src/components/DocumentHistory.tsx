@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { Clock, RotateCcw, Eye } from "lucide-react";
 
@@ -14,7 +14,7 @@ interface DocumentHistoryProps {
 }
 
 export function DocumentHistory({ documentId }: DocumentHistoryProps) {
-  const { toast } = useToast();
+
   const [selectedVersion, setSelectedVersion] = useState<number | null>(null);
   const [restoreConfirm, setRestoreConfirm] = useState<number | null>(null);
 
@@ -37,19 +37,12 @@ export function DocumentHistory({ documentId }: DocumentHistoryProps) {
   // Restore version mutation
   const restoreVersion = trpc.versioning.restoreVersion.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Document restored to previous version",
-      });
+      toast.success("Document restored to previous version");
       setRestoreConfirm(null);
       refetch();
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to restore version",
-        variant: "destructive",
-      });
+      toast.error(error.message || "Failed to restore version");
     },
   });
 
