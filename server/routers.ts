@@ -7,6 +7,7 @@ import * as db from "./db";
 import { willGenerationRouter } from "./will_generation_procedures";
 import { chatRouter } from "./chat_procedures";
 import { userRouter } from "./user_procedures";
+import { versioningRouter, sharingRouter } from "./versioning_procedures";
 
 export const appRouter = router({
   system: systemRouter,
@@ -197,6 +198,8 @@ export const appRouter = router({
   willGeneration: willGenerationRouter,
   chat: chatRouter,
   user: userRouter,
+  versioning: versioningRouter,
+  sharing: sharingRouter,
 });
 
 export type AppRouter = typeof appRouter;

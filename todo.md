@@ -106,7 +106,7 @@
 - [x] Users table with OAuth integration
 - [x] Documents table (Wills, POAs)
 - [ ] Document versions table
-- [ ] Chat history table
+- [x] Chat history table
 - [x] User preferences table
 - [x] Subscription/plan table
 

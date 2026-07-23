@@ -113,3 +113,37 @@ export const subscriptions = mysqlTable("subscriptions", {
 
 export type Subscription = typeof subscriptions.$inferSelect;
 export type InsertSubscription = typeof subscriptions.$inferInsert;
+
+
+/**
+ * Document Versions table for tracking document history and changes
+ */
+export const documentVersions = mysqlTable("document_versions", {
+  id: int("id").autoincrement().primaryKey(),
+  documentId: int("documentId").notNull().references(() => documents.id, { onDelete: "cascade" }),
+  versionNumber: int("versionNumber").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  status: mysqlEnum("status", ["draft", "completed", "signed"]).notNull(),
+  changesSummary: text("changesSummary"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  createdBy: int("createdBy").notNull().references(() => users.id),
+});
+
+export type DocumentVersion = typeof documentVersions.$inferSelect;
+export type InsertDocumentVersion = typeof documentVersions.$inferInsert;
+
+/**
+ * Document Sharing table for managing document access and permissions
+ */
+export const documentSharing = mysqlTable("document_sharing", {
+  id: int("id").autoincrement().primaryKey(),
+  documentId: int("documentId").notNull().references(() => documents.id, { onDelete: "cascade" }),
+  sharedWithUserId: int("sharedWithUserId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  permission: mysqlEnum("permission", ["view", "edit", "comment"]).default("view").notNull(),
+  sharedAt: timestamp("sharedAt").defaultNow().notNull(),
+  expiresAt: timestamp("expiresAt"),
+});
+
+export type DocumentSharing = typeof documentSharing.$inferSelect;
+export type InsertDocumentSharing = typeof documentSharing.$inferInsert;
