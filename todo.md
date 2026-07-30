@@ -178,7 +178,7 @@
 - [x] Display current tier badge in profile
 - [x] Add tier benefits display in account settings
 - [x] Implement tier-based feature access control
-- [ ] Create tier comparison modal
+- [x] Create tier comparison modal
 - [x] Add account info update functionality
 
 
