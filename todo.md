@@ -211,7 +211,7 @@
 
 ## Phase 14: Email Notifications System
 - [x] Create email notification service for document sharing
-- [ ] Implement notification preferences in account settings (future enhancement)
+- [x] Implement notification preferences in account settings
 - [ ] Add email templates for sharing notifications (future enhancement)
 - [ ] Create notification history/log (future enhancement)
 - [ ] Add unsubscribe functionality (future enhancement)
@@ -222,7 +222,7 @@
 - [x] Build simple estate template
 - [x] Build blended family template
 - [x] Build business owner template
-- [ ] Implement template selection UI (future enhancement)
+- [x] Implement template selection UI
 - [ ] Add template preview functionality (future enhancement)
 - [ ] Create template management for admins (future enhancement)
 
@@ -230,7 +230,7 @@
 - [x] Implement real-time document sync (backend service)
 - [x] Add change tracking system (backend service)
 - [x] Create conflict resolution logic (backend service)
-- [ ] Build collaborative cursor display (future enhancement - requires WebSocket)
-- [ ] Add presence indicators (future enhancement - requires WebSocket)
+- [x] Build collaborative cursor display
+- [x] Add presence indicators
 - [ ] Implement undo/redo for collaborative edits (future enhancement)
 - [x] Create activity log for changes (backend service)
