@@ -147,3 +147,21 @@ export const documentSharing = mysqlTable("document_sharing", {
 
 export type DocumentSharing = typeof documentSharing.$inferSelect;
 export type InsertDocumentSharing = typeof documentSharing.$inferInsert;
+
+/**
+ * Notifications table for tracking user notifications
+ */
+export const notifications = mysqlTable("notifications", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: mysqlEnum("type", ["document_shared", "document_updated", "share_revoked", "access_granted"]).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message"),
+  documentId: int("documentId").references(() => documents.id, { onDelete: "cascade" }),
+  senderId: int("senderId").references(() => users.id, { onDelete: "set null" }),
+  read: boolean("read").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;

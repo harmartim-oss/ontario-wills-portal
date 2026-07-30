@@ -207,3 +207,30 @@
 - [x] Estimated time to answer for each question
 - [x] Examples and help text for guidance
 - [x] Legal notes and compliance information
+
+
+## Phase 14: Email Notifications System
+- [x] Create email notification service for document sharing
+- [ ] Implement notification preferences in account settings
+- [ ] Add email templates for sharing notifications
+- [ ] Create notification history/log
+- [ ] Add unsubscribe functionality
+- [ ] Test email delivery and formatting
+
+## Phase 15: Document Templates
+- [x] Create template database schema
+- [x] Build simple estate template
+- [x] Build blended family template
+- [x] Build business owner template
+- [ ] Implement template selection UI
+- [ ] Add template preview functionality
+- [ ] Create template management for admins
+
+## Phase 16: Collaborative Editing
+- [ ] Implement real-time document sync
+- [ ] Add change tracking system
+- [ ] Create conflict resolution logic
+- [ ] Build collaborative cursor display
+- [ ] Add presence indicators
+- [ ] Implement undo/redo for collaborative edits
+- [ ] Create activity log for changes
